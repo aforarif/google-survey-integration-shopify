@@ -1,0 +1,32 @@
+{% if first_time_accessed %}
+  <!-- BEGIN Google Customer Reviews -->
+  <script src="https://apis.google.com/js/platform.js?onload=renderOptIn" async defer></script>
+  <script>
+    window.renderOptIn = function() {
+      window.gapi.load('surveyoptin', function() {
+        window.gapi.surveyoptin.render(
+          {
+            // REQUIRED FIELDS
+            "merchant_id": 1111111111, // Your Google Merchant Center ID
+            "order_id": "{{ order.order_number }}", // Use order.order_number instead of order.name
+            "email": "{{ order.email }}", // Customer Email
+            "delivery_country": "{{ order.shipping_address.country_code }}", // Corrected syntax
+            "estimated_delivery_date": "{{ order.created_at | date: '%s' | plus: 604800 | date: '%F' }}", // 7 days after order creation
+
+            // OPTIONAL FIELDS
+            "products": [
+              {% for line_item in order.line_items %}
+                {"gtin":"{{ line_item.product.barcode }}"} {% unless forloop.last %},{% endunless %}
+              {% endfor %}
+            ]
+          });
+      });
+    }
+
+    // Set the language for the survey
+    window.___gcfg = {
+      lang: '{{ shop.locale.iso_code }}' // Corrected syntax for shop locale
+    };
+  </script>
+  <!-- END Google Customer Reviews -->
+{% endif %}
