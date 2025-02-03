@@ -12,6 +12,3 @@ This repository contains the Liquid script for integrating Google Customer Revie
 - **Merchant Center ID**: 1111111111
 - **Survey Delay**: 7 days after order creation
 - **Optional Fields**: Includes product GTINs for better survey relevance.
-
-## License
-This project is generated using AI.
