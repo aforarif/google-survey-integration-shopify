@@ -8,4 +8,4 @@ This repository contains the Liquid script for integrating Google Customer Revie
 
 ## Customizations
 - **Replace Merchant Center ID**: 1111111111
-- **Replace Estimated Delivery Time**: 604800 (It's been converted days to seconds. Convert days into seconds from Google i.e 7 days = 604800 seconds)
+- **Replace Estimated Delivery Date**: 604800 ( It's been converted days into seconds. Convert days into seconds from Google i.e 7 days = 604800 seconds )
