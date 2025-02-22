@@ -1,31 +1,46 @@
 {% if first_time_accessed %}
   <!-- BEGIN Google Customer Reviews -->
+  <script>
+    // Set the language for the survey (default to German if locale is not set)
+    window.___gcfg = {
+      lang: '{{ shop.locale.iso_code | default: 'de' }}' // Use Shopify locale, fallback to 'de' (German)
+    };
+  </script>
+
   <script src="https://apis.google.com/js/platform.js?onload=renderOptIn" async defer></script>
   <script>
     window.renderOptIn = function() {
       window.gapi.load('surveyoptin', function() {
-        window.gapi.surveyoptin.render(
-          {
-            // REQUIRED FIELDS
-            "merchant_id": 1111111111, // Replace Google Merchant Center ID
-            "order_id": "{{ order.order_number }}", // Customer Order NO
-            "email": "{{ order.email }}", // Customer Email
-            "delivery_country": "{{ order.shipping_address.country_code }}", // Delivery Country
-            "estimated_delivery_date": "{{ order.created_at | date: '%s' | plus: 604800 | date: '%F' }}", // 7 days after order creation
+        var surveyConfig = {
+          // REQUIRED FIELDS
+          "merchant_id": 1111111111, // Your Google Merchant Center ID
+          "order_id": "{{ order.order_number }}", // Shopify Order ID
+          "email": "{{ order.email }}", // Customer Email
+          "delivery_country": "{{ order.shipping_address.country_code }}", // Shipping Country Code
+          "estimated_delivery_date": "{{ order.created_at | date: '%s' | plus: 432000 | date: '%F' }}", // 5 days after order creation
 
-            // OPTIONAL FIELDS
+          // OPTIONAL FIELDS - Only include products if GTIN exists
+          {% assign has_gtin = false %}
+          {% for line_item in order.line_items %}
+            {% if line_item.product.barcode %}
+              {% assign has_gtin = true %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+
+          {% if has_gtin %}
             "products": [
               {% for line_item in order.line_items %}
-                {"gtin":"{{ line_item.product.barcode }}"} {% unless forloop.last %},{% endunless %}
+                {% if line_item.product.barcode %}
+                  {"gtin": "{{ line_item.product.barcode }}"}{% unless forloop.last %},{% endunless %}
+                {% endif %}
               {% endfor %}
             ]
-          });
-      });
-    }
+          {% endif %}
+        };
 
-    // Set the language for the survey
-    window.___gcfg = {
-      lang: '{{ shop.locale.iso_code }}' // Shop Language
+        window.gapi.surveyoptin.render(surveyConfig);
+      });
     };
   </script>
   <!-- END Google Customer Reviews -->
