@@ -1,74 +1,73 @@
 # Google Customer Reviews Script for Shopify
 
-This script integrates Google Customer Reviews with your Shopify store. It sends an invitation to customers to provide feedback on their shopping experience after their purchase.
-
----
+This script integrates **Google Customer Reviews** into Shopify. It dynamically configures the survey language and estimated delivery time based on the shipping country.
 
 ## Configuration Instructions
 
-### 1. **Language Setting**
-- The script automatically detects the shop's language using `{{ shop.locale.iso_code }}`.
-- If the locale is not set, the language defaults to **German** (`'de'`).
-- To change the default language, modify the fallback language code:
-  - Example: Change `default: 'de'` to `default: 'en'` for English as the fallback.
+### 1. Update Your Google Merchant Center ID
+Replace the placeholder Merchant ID in the script with your actual **Google Merchant Center ID**.
 
----
+```liquid
+"merchant_id": 5348651127, // Your Google Merchant Center ID
 
-### 2. **Merchant ID**
-- Replace `1111111111` with your **Google Merchant Center ID** in the script:
-  ```javascript
-  "merchant_id": 1111111111, // Your Google Merchant Center ID
-  ```
+2. Configure Language Based on Shipping Country
 
----
+The script automatically sets the survey language based on the shipping country code.
+You can modify the country-language mapping in this section:
 
-### 3. **Estimated Delivery Date**
-- The estimated delivery date is set to **5 days** after order creation (432,000 seconds).
-- To adjust for your delivery time:
-  1. Determine your delivery time in days.
-  2. Convert days into seconds using the formula:
-     - **1 day = 86400 seconds**
-     - Example:
-       - If delivery is **3 days**, the calculation would be:  
-         `3 days × 86400 seconds = 259200 seconds`.
-       - If delivery is **7 days**, the calculation would be:  
-         `7 days × 86400 seconds = 604800 seconds`.
-  3. Update the `estimated_delivery_date` field with the corresponding value in seconds:
-     ```javascript
-     "estimated_delivery_date": "{{ order.created_at | date: '%s' | plus: 259200 | date: '%F' }}", // 3 days after order creation
-     ```
+var countryLanguageMap = {
+  'DE': 'de', // Germany - German
+  'FR': 'fr', // France - French
+  'ES': 'es', // Spain - Spanish
+  'IT': 'it', // Italy - Italian
+  'NL': 'nl', // Netherlands - Dutch
+  'PL': 'pl', // Poland - Polish
+  'US': 'en', // United States - English
+  'GB': 'en', // United Kingdom - English
+  'CA': 'en', // Canada - English
+  'AU': 'en', // Australia - English
+  'IN': 'en', // India - English
+  'JP': 'ja', // Japan - Japanese
+  'CN': 'zh-CN' // China - Simplified Chinese
+};
 
----
+If your store ships to additional countries, you can add more language mappings to this list.
 
-### 4. **GTIN (Barcode)**
-- If the products have a GTIN (barcode), they will be sent with the survey request.
-- The script checks if a product has a barcode and includes it in the `products` array.
-- No changes are needed unless you want to customize which products to include.
+3. Configure Estimated Delivery Date
 
----
+The script automatically sets the estimated delivery date based on whether the order is domestic (Germany) or international:
+	•	Domestic (Germany orders) → 7 days (604,800 seconds)
+	•	International orders → 12 days (1,036,800 seconds)
 
-### 5. **Script Placement**
-To add the script to your Shopify store:
-1. Go to **Settings > Checkout** in the Shopify admin panel.
-2. Scroll to **Order Status Page**.
-3. Paste the entire script into the **Additional Scripts** field.
-4. Click **Save**.
+"estimated_delivery_date": "{{ order.created_at | date: '%s' | plus: {{ order.shipping_address.country_code == 'DE' | ternary: 604800, 1036800 }} | date: '%F' }}",
 
----
+If you need different delivery estimates, update the number of seconds:
+	•	1 day = 86,400 seconds
+	•	7 days = 604,800 seconds
+	•	12 days = 1,036,800 seconds
 
-## Notes
-- **Google Merchant Center Setup**: Ensure your Google Merchant Center account is set up for collecting customer reviews. Visit [Google Merchant Center](https://merchants.google.com/) for setup instructions.
-- **Delivery Time**: Adjust the `estimated_delivery_date` if your delivery time is different from the default 5 days.
+To adjust the estimated delivery, modify these values accordingly.
 
----
+4. Add Script to Shopify Checkout
 
-### How to Convert Days to Seconds
-1. Multiply the number of days by **86400** (since 1 day = 86400 seconds).
-2. Example:  
-   - 1 day = 86400 seconds  
-   - 3 days = 3 × 86400 = **259200 seconds**  
-   - 7 days = 7 × 86400 = **604800 seconds**  
+To enable Google Customer Reviews in Shopify, follow these steps:
+	1.	Go to Shopify Admin Panel
+	2.	Navigate to Settings → Checkout
+	3.	Find the “Order status page” section
+	4.	Paste the script into the Additional scripts box
+	5.	Save the changes
 
-This should help you adjust the `estimated_delivery_date` properly.
+Google will automatically send a review request to customers after the estimated delivery time.
 
----
+✅ Features & Benefits
+
+✔️ Automatic language selection based on the shipping country
+✔️ Flexible delivery estimates for domestic and international orders
+✔️ Fully compatible with Shopify’s checkout scripts
+✔️ Only includes products with valid GTIN (barcode) when available
+
+This setup ensures a smooth Google Customer Reviews experience for both domestic and international customers. 🚀
+
+Need Help?
+
+For any issues, refer to Google’s Customer Reviews documentation or contact support.
