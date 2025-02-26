@@ -1,9 +1,29 @@
 {% if first_time_accessed %}
   <!-- BEGIN Google Customer Reviews -->
   <script>
-    // Set the language for the survey (default to German if locale is not set)
+    // Map country codes to Google-supported survey languages
+    var countryLanguageMap = {
+      'DE': 'de', // Germany - German
+      'FR': 'fr', // France - French
+      'ES': 'es', // Spain - Spanish
+      'IT': 'it', // Italy - Italian
+      'NL': 'nl', // Netherlands - Dutch
+      'PL': 'pl', // Poland - Polish
+      'US': 'en', // United States - English
+      'GB': 'en', // United Kingdom - English
+      'CA': 'en', // Canada - English
+      'AU': 'en', // Australia - English
+      'IN': 'en', // India - English
+      'JP': 'ja', // Japan - Japanese
+      'CN': 'zh-CN' // China - Simplified Chinese
+    };
+
+    // Get the shipping country code from Shopify
+    var shippingCountry = "{{ order.shipping_address.country_code }}";
+
+    // Set the language based on the shipping country, default to English
     window.___gcfg = {
-      lang: '{{ shop.locale.iso_code | default: 'de' }}' // Use Shopify locale, fallback to 'de' (German)
+      lang: countryLanguageMap[shippingCountry] || 'en'
     };
   </script>
 
@@ -17,7 +37,9 @@
           "order_id": "{{ order.order_number }}", // Shopify Order ID
           "email": "{{ order.email }}", // Customer Email
           "delivery_country": "{{ order.shipping_address.country_code }}", // Shipping Country Code
-          "estimated_delivery_date": "{{ order.created_at | date: '%s' | plus: 432000 | date: '%F' }}", // 5 days after order creation
+
+          // Set estimated delivery date: 7 days for domestic (Germany), 12 days for international
+          "estimated_delivery_date": "{{ order.created_at | date: '%s' | plus: {{ order.shipping_address.country_code == 'DE' | ternary: 604800, 1036800 }} | date: '%F' }}",
 
           // OPTIONAL FIELDS - Only include products if GTIN exists
           {% assign has_gtin = false %}
